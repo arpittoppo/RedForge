@@ -1,0 +1,35 @@
+# Virtual Environment
+.venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution
+build/
+dist/
+*.egg-info/
+
+# Logs
+*.log
+
+# Testing
+.pytest_cache/
+
+# Ruff
+.ruff_cache/
+
+# VS Code
+.vscode/
+
+# Databases
+*.db
+*.sqlite3
+
+# Environment
+.env
+
+# OS Files
+.DS_Store
+Thumbs.db
