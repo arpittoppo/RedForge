@@ -5,6 +5,12 @@ This module is responsible for coordinating the startup
 and shutdown of the application.
 """
 
+import sys
+
+from PySide6.QtWidgets import QApplication
+
+from redforge.ui.windows.main_window import MainWindow
+
 
 class Application:
     """
@@ -13,10 +19,12 @@ class Application:
 
     def __init__(self) -> None:
         """Initialize the application."""
-        pass
+        self.qt_app = QApplication(sys.argv)
+        self.window = MainWindow()
 
     def run(self) -> None:
         """
         Run the RedForge application.
         """
-        print("Starting RedForge...")
+        self.window.show()
+        sys.exit(self.qt_app.exec())
