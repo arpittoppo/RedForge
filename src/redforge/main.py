@@ -1,11 +1,17 @@
 """
 RedForge
 
-Main Application Entry Point.
+Application entry point.
 """
 
-def main():
-    print("Welcome to RedForge")
+from redforge.app.bootstrap import bootstrap
+
+
+def main() -> None:
+    """
+    Start the RedForge application.
+    """
+    bootstrap()
 
 
 if __name__ == "__main__":
