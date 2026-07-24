@@ -1,6 +1,6 @@
 from redforge.database.base import Base
 from redforge.database.engine import engine
-
+# Import all models so SQLAlchemy registers them with Base.metadata
 import redforge.models
 
 
