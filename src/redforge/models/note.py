@@ -1,13 +1,14 @@
-from sqlalchemy import ForeignKey
-from sqlalchemy import String
-from sqlalchemy import Text
+from __future__ import annotations
+from typing import TYPE_CHECKING
 
-from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import mapped_column
-from sqlalchemy.orm import relationship
+from sqlalchemy import ForeignKey, String, Text
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from redforge.database.base import Base
 from redforge.database.mixins import TimestampMixin
+
+if TYPE_CHECKING:
+    from .engagement import Engagement
 
 
 class Note(Base, TimestampMixin):
@@ -20,13 +21,9 @@ class Note(Base, TimestampMixin):
         ForeignKey("engagements.id")
     )
 
-    title: Mapped[str] = mapped_column(
-        String(255)
-    )
+    title: Mapped[str] = mapped_column(String(255))
 
-    content: Mapped[str] = mapped_column(
-        Text
-    )
+    content: Mapped[str] = mapped_column(Text)
 
     engagement: Mapped["Engagement"] = relationship(
         "Engagement",

@@ -1,9 +1,13 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
 from sqlalchemy import ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from redforge.database.base import Base
 from redforge.database.mixins import TimestampMixin
 
+if TYPE_CHECKING:
+    from .engagement import Engagement
 
 class Recon(Base, TimestampMixin):
 
