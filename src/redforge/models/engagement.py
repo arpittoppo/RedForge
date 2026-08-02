@@ -36,32 +36,40 @@ class Engagement(Base, TimestampMixin):
         nullable=True,
     )
 
-    scopes: Mapped[list["Scope"]] = relationship(
+    # One Scope per Engagement
+    scope: Mapped["Scope"] = relationship(
         "Scope",
         back_populates="engagement",
+        uselist=False,
         cascade="all, delete-orphan",
     )
+
+    # One-to-Many
     recon_entries: Mapped[list["Recon"]] = relationship(
         "Recon",
         back_populates="engagement",
         cascade="all, delete-orphan",
     )
-    notes: Mapped[list["Note"]] = relationship(
+
+    notes: Mapped["Note"] = relationship(
         "Note",
         back_populates="engagement",
         cascade="all, delete-orphan",
     )
-    evidence: Mapped[list["Evidence"]] = relationship(
-        "Evidence",
-        back_populates="engagement",
-        cascade="all, delete-orphan",
+
+    evidence: Mapped[list[Evidence]] = relationship(
+    "Evidence",
+    back_populates="engagement",
+    cascade="all, delete-orphan",
     )
-    findings: Mapped[list["Finding"]] = relationship(
-        "Finding",
-        back_populates="engagement",
-        cascade="all, delete-orphan",
-    )
-    reports: Mapped[list["Report"]] = relationship(
+
+    findings: Mapped[list[Finding]] = relationship(
+    "Finding",
+    back_populates="engagement",
+    cascade="all, delete-orphan",
+)
+
+    reports: Mapped[list[Report]] = relationship(
         "Report",
         back_populates="engagement",
         cascade="all, delete-orphan",

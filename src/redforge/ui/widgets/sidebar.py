@@ -12,35 +12,15 @@ from PySide6.QtWidgets import (
 
 class Sidebar(QWidget):
     """
-    Sidebar navigation for RedForge.
+    Sidebar navigation for the RedForge workspace.
     """
 
     navigation_requested = Signal(str)
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent=None):
+        super().__init__(parent)
 
         self.setFixedWidth(240)
-
-        self._create_layout()
-        self._create_navigation()
-        self._create_buttons()
-
-        self.setLayout(self.layout)
-
-    def _create_layout(self):
-        """
-        Create the sidebar layout.
-        """
-
-        self.layout = QVBoxLayout()
-        self.layout.setSpacing(10)
-        self.layout.setContentsMargins(20, 10, 20, 10)
-
-    def _create_navigation(self):
-        """
-        Define all sidebar navigation items.
-        """
 
         self.sidebar_items = [
             {"id": "dashboard", "label": "Dashboard"},
@@ -53,27 +33,62 @@ class Sidebar(QWidget):
             {"id": "settings", "label": "Settings"},
         ]
 
-    def _create_buttons(self):
+        self.buttons: dict[str, QPushButton] = {}
+
+        self._build_ui()
+
+    def _build_ui(self):
         """
-        Create sidebar buttons.
+        Build the sidebar UI.
         """
 
-        self.navigation_buttons = {}
+        self.layout = QVBoxLayout(self)
+
+        self.layout.setSpacing(10)
+        self.layout.setContentsMargins(
+            20,
+            10,
+            20,
+            10,
+        )
 
         for item in self.sidebar_items:
-            button = QPushButton(item["label"])
 
-            self.navigation_buttons[item["id"]] = button
-
-            button.clicked.connect(
-                lambda checked=False, page_id=item["id"]: self._handle_navigation(page_id)
+            button = QPushButton(
+                item["label"]
             )
 
-            self.layout.addWidget(button)
+            button.clicked.connect(
+                lambda checked=False, page=item["id"]: self._navigate(page)
+            )
 
-    def _handle_navigation(self, page_id):
+            self.buttons[item["id"]] = button
+
+            self.layout.addWidget(
+                button
+            )
+
+        # Keep the navigation buttons at the top.
+        self.layout.addStretch()
+
+    def _navigate(
+        self,
+        page: str,
+    ):
         """
-        Handle sidebar navigation.
+        Emit a navigation request.
         """
 
-        self.navigation_requested.emit(page_id)
+        self.navigation_requested.emit(
+            page
+        )
+
+    def button(
+        self,
+        page: str,
+    ) -> QPushButton:
+        """
+        Return a sidebar button by its page id.
+        """
+
+        return self.buttons[page]

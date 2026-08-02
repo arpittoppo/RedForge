@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
+
 from sqlalchemy import ForeignKey
 from sqlalchemy import String
 from sqlalchemy import Text
@@ -14,31 +15,40 @@ from redforge.database.mixins import TimestampMixin
 if TYPE_CHECKING:
     from .engagement import Engagement
 
+
 class Evidence(Base, TimestampMixin):
+    """
+    Stores a single evidence item for an engagement.
+    """
 
     __tablename__ = "evidence"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(
+        primary_key=True,
+    )
 
     engagement_id: Mapped[int] = mapped_column(
-        ForeignKey("engagements.id")
+        ForeignKey("engagements.id"),
     )
 
     title: Mapped[str] = mapped_column(
-        String(255)
+        String(255),
+        default="",
     )
 
     evidence_type: Mapped[str] = mapped_column(
-        String(50)
+        String(100),
+        default="Other",
     )
 
     file_path: Mapped[str] = mapped_column(
-        Text
+        String(500),
+        default="",
     )
 
-    description: Mapped[str | None] = mapped_column(
+    notes: Mapped[str] = mapped_column(
         Text,
-        nullable=True,
+        default="",
     )
 
     engagement: Mapped["Engagement"] = relationship(

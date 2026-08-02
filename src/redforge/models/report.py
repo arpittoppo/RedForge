@@ -21,7 +21,7 @@ class Report(Base, TimestampMixin):
 
     title: Mapped[str] = mapped_column(String(255))
 
-    content: Mapped[str] = mapped_column(Text)
+    content: Mapped[str] = mapped_column(Text,default="",)
 
     engagement: Mapped["Engagement"] = relationship(
         "Engagement",

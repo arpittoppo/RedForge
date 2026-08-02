@@ -1,18 +1,18 @@
-"""
-Main window for RedForge.
-"""
-
 from PySide6.QtWidgets import (
     QMainWindow,
-    QWidget,
-    QVBoxLayout,
-    QHBoxLayout,
+    QStackedWidget,
 )
 
-from redforge.ui.widgets.content_area import ContentArea
-from redforge.ui.widgets.sidebar import Sidebar
-from redforge.ui.widgets.status_bar import StatusBar
-from redforge.ui.widgets.top_bar import TopBar
+from redforge.services.engagement_service import EngagementService
+from redforge.services.scope_service import ScopeService
+from redforge.services.note_service import NoteService
+from redforge.services.recon_service import ReconService
+from redforge.services.evidence_service import EvidenceService
+from redforge.services.finding_service import FindingService
+from redforge.services.report_service import ReportService
+
+from redforge.ui.views.home_view import HomeView
+from redforge.ui.views.workspace_view import WorkspaceView
 
 
 class MainWindow(QMainWindow):
@@ -20,37 +20,125 @@ class MainWindow(QMainWindow):
     Main application window.
     """
 
-    def __init__(self):
+    def __init__(
+        self,
+        engagement_service: EngagementService,
+        scope_service: ScopeService,
+        note_service: NoteService,
+        recon_service: ReconService,
+        evidence_service:EvidenceService,
+        finding_service:FindingService,
+        report_service:ReportService,
+    ):
         super().__init__()
+
+        # ==================================================
+        # Services
+        # ==================================================
+
+        self.engagement_service = engagement_service
+        self.scope_service = scope_service
+        self.note_service = note_service
+        self.recon_service = recon_service
+        self.evidence_service = evidence_service
+        self.finding_service = finding_service
+        self.report_service = report_service
+
+        # ==================================================
+        # Window
+        # ==================================================
 
         self.setWindowTitle("RedForge")
         self.resize(1400, 900)
 
-        self.sidebar = Sidebar()
-        self.sidebar.navigation_requested.connect(self._navigate_to_page)
+        # ==================================================
+        # Central Stack
+        # ==================================================
 
-        self.top_bar = TopBar()
-        self.content_area = ContentArea()
-        self.status_bar = StatusBar()
+        self.stack = QStackedWidget()
+        self.setCentralWidget(self.stack)
 
-        self.central_widget = QWidget()
-        self.setCentralWidget(self.central_widget)
+        # ==================================================
+        # Views
+        # ==================================================
 
-        self.main_layout = QVBoxLayout()
-        self.workspace_layout = QHBoxLayout()
+        self.home_view = HomeView(
+            engagement_service=self.engagement_service,
+        )
 
-        self.workspace_layout.addWidget(self.sidebar)
-        self.workspace_layout.addWidget(self.content_area)
+        self.workspace_view = WorkspaceView(
+            scope_service=self.scope_service,
+            note_service=self.note_service,
+            recon_service=self.recon_service,
+            evidence_service=self.evidence_service,
+            finding_service=self.finding_service,
+            report_service=self.report_service,
+        )
 
-        self.main_layout.addWidget(self.top_bar)
-        self.main_layout.addLayout(self.workspace_layout)
-        self.main_layout.addWidget(self.status_bar)
+        # ==================================================
+        # Signals
+        # ==================================================
 
-        self.central_widget.setLayout(self.main_layout)
+        self.home_view.engagement_selected.connect(
+            self._open_engagement
+        )
 
-    def _navigate_to_page(self, page_id):
+        self.workspace_view.home_requested.connect(
+            self._go_home
+        )
+
+        # ==================================================
+        # Stack
+        # ==================================================
+
+        self.stack.addWidget(
+            self.home_view
+        )
+
+        self.stack.addWidget(
+            self.workspace_view
+        )
+
+        self.stack.setCurrentWidget(
+            self.home_view
+        )
+
+    def _open_engagement(
+        self,
+        engagement_id: int,
+    ):
         """
-        Navigate to the requested page.
+        Open the selected engagement.
         """
 
-        print(page_id)
+        print(
+            f"MainWindow received: {engagement_id}"
+        )
+
+        engagement = self.engagement_service.get_engagement(
+            engagement_id
+        )
+
+        if engagement is None:
+            return
+
+        self.workspace_view.load_engagement(
+            engagement
+        )
+
+        self.stack.setCurrentWidget(
+            self.workspace_view
+        )
+
+    def _go_home(self):
+        """
+        Return to the Home dashboard.
+        """
+
+        print(
+            "MainWindow received Home request"
+        )
+
+        self.stack.setCurrentWidget(
+            self.home_view
+        )

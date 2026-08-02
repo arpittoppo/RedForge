@@ -1,7 +1,9 @@
-from datetime import datetime
+"""
+Scope model.
+"""
 
 from sqlalchemy import ForeignKey
-from sqlalchemy import String
+from sqlalchemy import Text
 
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
@@ -12,24 +14,32 @@ from redforge.database.mixins import TimestampMixin
 
 
 class Scope(Base, TimestampMixin):
+    """
+    Stores the scope information for an engagement.
+    """
 
     __tablename__ = "scopes"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(
+        primary_key=True
+    )
 
     engagement_id: Mapped[int] = mapped_column(
-        ForeignKey("engagements.id")
+        ForeignKey("engagements.id"),
+        unique=True,
     )
 
-    scope_type: Mapped[str] = mapped_column(
-        String(10)
+    in_scope: Mapped[str] = mapped_column(
+        Text,
+        default="",
     )
 
-    target: Mapped[str] = mapped_column(
-        String(255)
+    out_scope: Mapped[str] = mapped_column(
+        Text,
+        default="",
     )
 
     engagement = relationship(
         "Engagement",
-        back_populates="scopes",
+        back_populates="scope",
     )

@@ -1,7 +1,13 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
-from sqlalchemy import ForeignKey, String, Text
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from sqlalchemy import ForeignKey
+from sqlalchemy import String
+from sqlalchemy import Text
+
+from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import mapped_column
+from sqlalchemy.orm import relationship
 
 from redforge.database.base import Base
 from redforge.database.mixins import TimestampMixin
@@ -9,22 +15,29 @@ from redforge.database.mixins import TimestampMixin
 if TYPE_CHECKING:
     from .engagement import Engagement
 
+
 class Recon(Base, TimestampMixin):
+    """
+    Stores a single recon entry for an engagement.
+    """
 
-    __tablename__ = "recon"
+    __tablename__ = "recons"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(
+        primary_key=True,
+    )
 
     engagement_id: Mapped[int] = mapped_column(
-        ForeignKey("engagements.id")
+        ForeignKey("engagements.id"),
     )
 
     recon_type: Mapped[str] = mapped_column(
-        String(50)
+        String(100),
     )
 
     value: Mapped[str] = mapped_column(
-        Text
+        Text,
+        default="",
     )
 
     engagement: Mapped["Engagement"] = relationship(

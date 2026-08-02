@@ -3,7 +3,9 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QStackedWidget,
 )
-from redforge.ui.pages.dashboard_page import DashboardPage
+
+from redforge.ui.pages.home_dashboard_page import HomeDashboardPage
+
 
 class ContentArea(QWidget):
 
@@ -15,5 +17,3 @@ class ContentArea(QWidget):
 
         self.layout.addWidget(self.stack)
         self.setLayout(self.layout)
-        self.dashboard_page = DashboardPage()
-        self.stack.addWidget(self.dashboard_page)

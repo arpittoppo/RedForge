@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-from sqlalchemy import ForeignKey, String, Text
+from sqlalchemy import ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from redforge.database.base import Base
@@ -12,18 +12,25 @@ if TYPE_CHECKING:
 
 
 class Note(Base, TimestampMixin):
+    """
+    Notes document for an engagement.
+    """
 
     __tablename__ = "notes"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-
-    engagement_id: Mapped[int] = mapped_column(
-        ForeignKey("engagements.id")
+    id: Mapped[int] = mapped_column(
+        primary_key=True,
     )
 
-    title: Mapped[str] = mapped_column(String(255))
+    engagement_id: Mapped[int] = mapped_column(
+        ForeignKey("engagements.id"),
+        unique=True,
+    )
 
-    content: Mapped[str] = mapped_column(Text)
+    content: Mapped[str] = mapped_column(
+        Text,
+        default="",
+    )
 
     engagement: Mapped["Engagement"] = relationship(
         "Engagement",
