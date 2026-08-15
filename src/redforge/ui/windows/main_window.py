@@ -1,3 +1,6 @@
+from pathlib import Path
+
+from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
     QMainWindow,
     QStackedWidget,
@@ -26,9 +29,9 @@ class MainWindow(QMainWindow):
         scope_service: ScopeService,
         note_service: NoteService,
         recon_service: ReconService,
-        evidence_service:EvidenceService,
-        finding_service:FindingService,
-        report_service:ReportService,
+        evidence_service: EvidenceService,
+        finding_service: FindingService,
+        report_service: ReportService,
     ):
         super().__init__()
 
@@ -50,6 +53,18 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle("RedForge")
         self.resize(1400, 900)
+
+        # Icon
+        icon_path = (
+            Path(__file__).resolve().parents[4]
+            / "assets"
+            / "redforge.ico"
+        )
+
+        print("ICON PATH:", icon_path)
+        print("ICON EXISTS:", icon_path.exists())
+
+        self.setWindowIcon(QIcon(str(icon_path)))
 
         # ==================================================
         # Central Stack
