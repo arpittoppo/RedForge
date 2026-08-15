@@ -50,29 +50,24 @@ class ReportsPage(QWidget):
         # Widgets
         # ==================================================
 
-        self.new_report_button = QPushButton(
-            "New Report"
-        )
+        self.new_report_button = QPushButton("+ New Report")
+        self.new_report_button.setObjectName("primaryButton")
 
-        self.delete_report_button = QPushButton(
-            "Delete"
-        )
+        self.delete_report_button = QPushButton("Delete")
+        self.delete_report_button.setObjectName("dangerButton")
 
-        self.reports_label = QLabel(
-            "Reports"
-        )
+        self.reports_label = QLabel("REPORTS")
+        self.reports_label.setObjectName("eyebrow")
 
         self.reports_list = QListWidget()
 
-        self.title_label = QLabel(
-            "Title"
-        )
+        self.title_label = QLabel("Title")
+        self.title_label.setObjectName("caption")
 
         self.title_edit = QLineEdit()
 
-        self.content_label = QLabel(
-            "Content"
-        )
+        self.content_label = QLabel("Content")
+        self.content_label.setObjectName("caption")
 
         self.content_edit = QTextEdit()
 
@@ -81,76 +76,37 @@ class ReportsPage(QWidget):
         # ==================================================
 
         button_layout = QHBoxLayout()
-
-        button_layout.addWidget(
-            self.new_report_button
-        )
-
-        button_layout.addWidget(
-            self.delete_report_button
-        )
+        button_layout.addWidget(self.new_report_button)
+        button_layout.addWidget(self.delete_report_button)
+        button_layout.addStretch()
 
         layout = QVBoxLayout(self)
+        layout.setContentsMargins(32, 28, 32, 28)
+        layout.setSpacing(10)
 
-        layout.addLayout(
-            button_layout
-        )
-
-        layout.addWidget(
-            self.reports_label
-        )
-
-        layout.addWidget(
-            self.reports_list
-        )
-
-        layout.addWidget(
-            self.title_label
-        )
-
-        layout.addWidget(
-            self.title_edit
-        )
-
-        layout.addWidget(
-            self.content_label
-        )
-
-        layout.addWidget(
-            self.content_edit
-        )
+        layout.addLayout(button_layout)
+        layout.addWidget(self.reports_label)
+        layout.addWidget(self.reports_list)
+        layout.addWidget(self.title_label)
+        layout.addWidget(self.title_edit)
+        layout.addWidget(self.content_label)
+        layout.addWidget(self.content_edit)
 
         # ==================================================
         # Signals
         # ==================================================
 
-        self.new_report_button.clicked.connect(
-            self._create_report
-        )
+        self.new_report_button.clicked.connect(self._create_report)
+        self.delete_report_button.clicked.connect(self._delete_report)
+        self.reports_list.itemClicked.connect(self._select_report)
+        self.title_edit.textChanged.connect(self._save_report)
+        self.content_edit.textChanged.connect(self._save_report)
 
-        self.delete_report_button.clicked.connect(
-            self._delete_report
-        )
-
-        self.reports_list.itemClicked.connect(
-            self._select_report
-        )
-
-        self.title_edit.textChanged.connect(
-            self._save_report
-        )
-
-        self.content_edit.textChanged.connect(
-            self._save_report
-        )
-        # ==================================================
+    # ==================================================
     # Public Methods
     # ==================================================
 
-    def load_engagement(
-        self,
-        engagement,
-    ):
+    def load_engagement(self, engagement):
         """
         Load the selected engagement.
         """
@@ -160,14 +116,11 @@ class ReportsPage(QWidget):
         self.report = None
 
         self.title_edit.clear()
-
         self.content_edit.clear()
 
         self._load_reports()
 
-    def _load_reports(
-        self,
-    ):
+    def _load_reports(self):
         """
         Load all reports.
         """
@@ -177,27 +130,16 @@ class ReportsPage(QWidget):
         if self.engagement is None:
             return
 
-        reports = self.report_service.get_reports(
-            self.engagement.id
-        )
+        reports = self.report_service.get_reports(self.engagement.id)
 
         for report in reports:
 
-            item = QListWidgetItem(
-                report.title or "Untitled Report"
-            )
+            item = QListWidgetItem(report.title or "Untitled Report")
+            item.setData(Qt.UserRole, report.id)
 
-            item.setData(
-                Qt.UserRole,
-                report.id,
-            )
+            self.reports_list.addItem(item)
 
-            self.reports_list.addItem(
-                item
-            )  
-    def _create_report(
-        self,
-    ):
+    def _create_report(self):
         """
         Create a new report.
         """
@@ -205,63 +147,37 @@ class ReportsPage(QWidget):
         if self.engagement is None:
             return
 
-        report = self.report_service.create_report(
-            self.engagement.id
-        )
+        report = self.report_service.create_report(self.engagement.id)
 
         self._load_reports()
 
-        self._select_report_by_id(
-            report.id
-        )
+        self._select_report_by_id(report.id)
 
-    def _select_report_by_id(
-        self,
-        report_id: int,
-    ):
+    def _select_report_by_id(self, report_id: int):
         """
         Select a report by its ID.
         """
 
-        for index in range(
-            self.reports_list.count()
-        ):
+        for index in range(self.reports_list.count()):
 
-            item = self.reports_list.item(
-                index
-            )
+            item = self.reports_list.item(index)
 
-            if item.data(
-                Qt.UserRole
-            ) == report_id:
+            if item.data(Qt.UserRole) == report_id:
 
-                self.reports_list.setCurrentItem(
-                    item
-                )
-
-                self._select_report(
-                    item
-                )
-
+                self.reports_list.setCurrentItem(item)
+                self._select_report(item)
                 self.title_edit.setFocus()
 
                 return
 
-    def _select_report(
-        self,
-        item: QListWidgetItem,
-    ):
+    def _select_report(self, item: QListWidgetItem):
         """
         Load the selected report.
         """
 
-        report_id = item.data(
-            Qt.UserRole
-        )
+        report_id = item.data(Qt.UserRole)
 
-        self.report = self.report_service.get_report(
-            report_id
-        )
+        self.report = self.report_service.get_report(report_id)
 
         if self.report is None:
             return
@@ -269,20 +185,13 @@ class ReportsPage(QWidget):
         self.title_edit.blockSignals(True)
         self.content_edit.blockSignals(True)
 
-        self.title_edit.setText(
-            self.report.title
-        )
-
-        self.content_edit.setPlainText(
-            self.report.content
-        )
+        self.title_edit.setText(self.report.title)
+        self.content_edit.setPlainText(self.report.content)
 
         self.title_edit.blockSignals(False)
         self.content_edit.blockSignals(False)
 
-    def _save_report(
-        self,
-    ):
+    def _save_report(self):
         """
         Save the selected report.
         """
@@ -291,14 +200,9 @@ class ReportsPage(QWidget):
             return
 
         title = self.title_edit.text().strip()
-
         content = self.content_edit.toPlainText().strip()
 
-        if (
-            title == self.report.title
-            and
-            content == self.report.content
-        ):
+        if title == self.report.title and content == self.report.content:
             return
 
         self.report_service.save_report(
@@ -313,14 +217,9 @@ class ReportsPage(QWidget):
         item = self.reports_list.currentItem()
 
         if item is not None:
+            item.setText(title or "Untitled Report")
 
-            item.setText(
-                title or "Untitled Report"
-            )
-
-    def _delete_report(
-        self,
-    ):
+    def _delete_report(self):
         """
         Delete the selected report.
         """
@@ -328,16 +227,13 @@ class ReportsPage(QWidget):
         if self.report is None:
             return
 
-        self.report_service.delete_report(
-            self.report
-        )
+        self.report_service.delete_report(self.report)
 
         self.report = None
 
         self.reports_list.clearSelection()
 
         self.title_edit.clear()
-
         self.content_edit.clear()
 
-        self._load_reports()                                 
+        self._load_reports()

@@ -22,6 +22,7 @@ class StatCard(QFrame):
     ):
         super().__init__(parent)
 
+        self.setObjectName("card")
         self.title = title
         self.count = count
 
@@ -33,33 +34,24 @@ class StatCard(QFrame):
         """
 
         layout = QVBoxLayout(self)
+        layout.setContentsMargins(18, 16, 18, 16)
+        layout.setSpacing(6)
 
-        self.title_label = QLabel(
-            self.title
+        self.count_label = QLabel(str(self.count))
+        self.count_label.setStyleSheet(
+            "font-size: 28px; font-weight: 700;"
         )
 
-        self.count_label = QLabel(
-            str(self.count)
-        )
+        self.title_label = QLabel(self.title.upper())
+        self.title_label.setObjectName("eyebrow")
 
-        layout.addWidget(
-            self.title_label
-        )
+        layout.addWidget(self.count_label)
+        layout.addWidget(self.title_label)
 
-        layout.addWidget(
-            self.count_label
-        )
-
-    def set_count(
-        self,
-        count: int,
-    ):
+    def set_count(self, count: int):
         """
         Update the displayed count.
         """
 
         self.count = count
-
-        self.count_label.setText(
-            str(count)
-        )
+        self.count_label.setText(str(count))

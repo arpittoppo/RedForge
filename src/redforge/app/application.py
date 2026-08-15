@@ -8,6 +8,7 @@ and shutdown of the application.
 import sys
 
 from PySide6.QtWidgets import QApplication
+from redforge.ui.styles.theme import apply_theme
 
 from redforge.database.session import SessionLocal
 
@@ -36,6 +37,7 @@ class Application:
         # ==================================================
 
         self.qt_app = QApplication(sys.argv)
+        apply_theme(self.qt_app)
 
         # ==================================================
         # Database
