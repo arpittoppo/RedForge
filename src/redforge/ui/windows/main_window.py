@@ -1,4 +1,5 @@
 from pathlib import Path
+import sys
 
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
@@ -55,15 +56,13 @@ class MainWindow(QMainWindow):
         self.resize(1400, 900)
 
         # Icon
-        icon_path = (
-            Path(__file__).resolve().parents[4]
-            / "assets"
-            / "redforge.ico"
-        )
 
-        print("ICON PATH:", icon_path)
-        print("ICON EXISTS:", icon_path.exists())
+        if getattr(sys, "frozen", False):
+            base_path = Path(sys._MEIPASS)
+        else:
+            base_path = Path(__file__).resolve().parents[4]
 
+        icon_path = base_path / "assets" / "redforge.ico"
         self.setWindowIcon(QIcon(str(icon_path)))
 
         # ==================================================
