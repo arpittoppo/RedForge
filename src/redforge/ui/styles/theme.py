@@ -10,18 +10,14 @@ from redforge.ui.styles.tokens import (
 )
 
 
-def build_stylesheet( font_scale: float = 1.0,) -> str:
+def build_stylesheet(font_scale: float = 1.0) -> str:
     c = Color
     f = Font
     r = Radius
     s = Space
-    def font_size(
-        size: int,
-    ) -> int:
-        return max(
-            1,
-            round(size * font_scale),
-        )
+
+    def font_size(size: int) -> int:
+        return max(1, round(size * font_scale))
 
     return f"""
 
@@ -29,20 +25,45 @@ def build_stylesheet( font_scale: float = 1.0,) -> str:
    GLOBAL
    ========================================================== */
 
-QWidget {{
-    background-color: {c.WINDOW};
-    color: {c.TEXT_PRIMARY};
+/* ----------------------------------------------------------
+   DO NOT set background-color on QWidget globally.
+   Doing so bleeds into every child widget inside dialogs,
+   sidebars, and panels — producing the black-strip effect
+   on label cells and title rows.
 
+   Instead: set background only on the root window containers
+   (QMainWindow, QDialog) and let everything else be
+   transparent by default, inheriting from its painted parent.
+   ---------------------------------------------------------- */
+
+QWidget {{
+    color: {c.TEXT_PRIMARY};
     font-family: {f.UI_FAMILY};
     font-size: {font_size(f.SIZE_MD)}px;
-
     selection-background-color: {c.SIGNAL_MUTED};
     selection-color: {c.TEXT_PRIMARY};
 }}
 
-QMainWindow,
-QDialog {{
+/* Root containers get the window background */
+QMainWindow {{
     background: {c.WINDOW};
+}}
+
+/* Dialogs get a lifted surface so the form grid is visible */
+QDialog {{
+    background: #2B2B31;
+}}
+
+/* All labels inside dialogs must be transparent so they show
+   the dialog surface behind them, not the QWidget default black */
+QDialog QLabel {{
+    background: transparent;
+}}
+
+/* General-purpose panels/frames that aren't explicitly styled
+   should also be transparent — they paint over their parent */
+QFrame {{
+    background: transparent;
 }}
 
 QToolTip {{
@@ -64,12 +85,14 @@ QLabel#pageTitle {{
     font-size: {font_size(f.SIZE_XXL)}px;
     font-weight: {f.WEIGHT_BOLD};
     padding-bottom: 2px;
+    background: transparent;
 }}
 
 QLabel#sectionTitle {{
     color: {c.TEXT_PRIMARY};
     font-size: {font_size(f.SIZE_XL)}px;
     font-weight: {f.WEIGHT_SEMIBOLD};
+    background: transparent;
 }}
 
 QLabel#eyebrow {{
@@ -78,17 +101,20 @@ QLabel#eyebrow {{
     font-weight: {f.WEIGHT_SEMIBOLD};
     letter-spacing: 1px;
     text-transform: uppercase;
+    background: transparent;
 }}
 
 QLabel#caption {{
     color: {c.TEXT_SECONDARY};
     font-size: {font_size(f.SIZE_SM)}px;
+    background: transparent;
 }}
 
 QLabel#mono {{
     font-family: {f.MONO_FAMILY};
     color: {c.TEXT_SECONDARY};
     font-size: {font_size(f.SIZE_SM)}px;
+    background: transparent;
 }}
 
 
@@ -544,6 +570,7 @@ QWidget#statusBar {{
 QLabel#statusText {{
     color: {c.TEXT_TERTIARY};
     font-size: {font_size(f.SIZE_XS)}px;
+    background: transparent;
 }}
 
 
@@ -600,6 +627,7 @@ QTabBar::tab:selected {{
 QCheckBox {{
     spacing: 10px;
     color: {c.TEXT_PRIMARY};
+    background: transparent;
 }}
 
 QCheckBox::indicator {{
@@ -627,6 +655,7 @@ QCheckBox::indicator:checked {{
 QRadioButton {{
     spacing: 10px;
     color: {c.TEXT_PRIMARY};
+    background: transparent;
 }}
 
 QRadioButton::indicator {{
@@ -868,6 +897,42 @@ QDialog {{
     border-radius: {r.LG}px;
 }}
 
+/* Every direct and nested widget inside a dialog is transparent
+   so the dialog surface (#2B2B31) shows through.
+   Without this, QWidget {{ background: WINDOW }} bleeds in
+   and paints label rows / title bars near-black. */
+QDialog QWidget {{
+    background: transparent;
+}}
+
+QDialog QLabel {{
+    background: transparent;
+    color: {c.TEXT_PRIMARY};
+}}
+
+/* Re-assert opaque backgrounds only for actual input controls
+   inside dialogs — they should still look like input wells */
+QDialog QLineEdit,
+QDialog QTextEdit,
+QDialog QPlainTextEdit,
+QDialog QComboBox,
+QDialog QSpinBox,
+QDialog QDateEdit {{
+    background: {c.INPUT};
+    border: 1px solid {c.BORDER};
+}}
+
+/* Buttons inside dialogs keep their own backgrounds */
+QDialog QPushButton {{
+    background: {c.BUTTON};
+}}
+
+QDialog QPushButton#primaryButton {{
+    background: {c.SIGNAL};
+    color: {c.TEXT_ON_ACCENT};
+    border: 1px solid {c.SIGNAL};
+}}
+
 
 /* ==========================================================
    DIALOG BUTTON BOX
@@ -931,12 +996,5 @@ def apply_theme(
     app: QApplication,
     font_scale: float = 1.0,
 ) -> None:
-    """
-    Apply the application theme stylesheet.
-    """
-
-    app.setStyleSheet(
-        build_stylesheet(
-            font_scale=font_scale
-        )
-    )
+    """Apply the application theme stylesheet."""
+    app.setStyleSheet(build_stylesheet(font_scale=font_scale))

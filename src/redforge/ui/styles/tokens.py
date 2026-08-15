@@ -12,6 +12,11 @@ Design Goals
 • High contrast
 • Soft elevation
 • Comfortable spacing
+
+Changelog
+---------
+v2 — Fixed black-strip issue in dialog label cells and lifted OVERLAY
+     so menus/dialogs read clearly against WINDOW background.
 """
 
 from __future__ import annotations
@@ -25,49 +30,51 @@ class Color:
     WINDOW = "#0D0D0F"            # Main application background
     VOID = WINDOW
 
-    SURFACE = "#151517"           # Cards / Sidebar / Panels
-    SURFACE_1 = "#1B1B1E"         # Inputs
-    SURFACE_2 = "#222226"         # Hover
-    SURFACE_3 = "#2A2A2F"         # Active / Raised
+    SURFACE = "#161618"           # Cards / Sidebar / Panels
+    SURFACE_1 = "#1E1E22"         # Inputs  ← was #1B1B1E, slightly warmer
+    SURFACE_2 = "#252529"         # Hover   ← was #222226
+    SURFACE_3 = "#2E2E33"         # Active / Raised  ← was #2A2A2F
 
-    OVERLAY = "#242429"           # Menus / Dialogs / Combo Popup
+    # OVERLAY: used for menus, dialogs, combo popups.
+    # Must be visibly lifted above WINDOW (#0D0D0F).
+    # Old value #242429 was too close to window bg.
+    # New value gives ~3 stops of lift — clearly a "floating" surface.
+    OVERLAY = "#2C2C32"
+
+    # DIALOG: the background of modal dialog windows.
+    # Distinct from OVERLAY so the form grid cells inherit this,
+    # not the near-black INPUT color. Previously the label column
+    # was resolving to INPUT (#121214) and printing text on black strips.
+    DIALOG = "#1A1A1E"
 
     # ==========================================================
     # Borders
     # ==========================================================
 
-    BORDER = "#2A2A2D"
-    BORDER_LIGHT = "#35353A"
-    BORDER_STRONG = "#404046"
+    BORDER = "#2E2E32"            # was #2A2A2D — tiny lift for visibility
+    BORDER_LIGHT = "#38383E"      # was #35353A
+    BORDER_STRONG = "#444449"     # was #404046
 
-    BORDER_FOCUS = "#EF4655"
+    BORDER_FOCUS = "#EF4655"      # unchanged
 
     # ==========================================================
     # Text
     # ==========================================================
 
-    TEXT_PRIMARY = "#F4F4F5"
-
-    TEXT_SECONDARY = "#B2B2B7"
-
-    TEXT_TERTIARY = "#8C8C91"
-
-    TEXT_DISABLED = "#5E5E63"
-
-    TEXT_ON_ACCENT = "#FFFFFF"
+    TEXT_PRIMARY = "#F4F4F5"      # unchanged
+    TEXT_SECONDARY = "#B2B2B7"    # unchanged
+    TEXT_TERTIARY = "#8C8C91"     # unchanged
+    TEXT_DISABLED = "#5E5E63"     # unchanged
+    TEXT_ON_ACCENT = "#FFFFFF"    # unchanged
 
     # ==========================================================
     # Accent
     # ==========================================================
 
-    SIGNAL = "#EF4655"
-
+    SIGNAL = "#EF4655"            # unchanged — looks great
     SIGNAL_HOVER = "#FF5A69"
-
     SIGNAL_PRESSED = "#D63A49"
-
     SIGNAL_MUTED = "#35171B"
-
     SIGNAL_BORDER = "#EF4655"
 
     # ==========================================================
@@ -75,20 +82,19 @@ class Color:
     # ==========================================================
 
     BUTTON = SURFACE_1
-
     BUTTON_HOVER = SURFACE_2
-
     BUTTON_PRESSED = SURFACE_3
 
     # ==========================================================
     # Inputs
     # ==========================================================
 
-    INPUT = "#121214"
+    # Was #121214 — too close to true black, bled into label cells.
+    # New value is clearly an "input well" but not a black strip.
+    INPUT = "#17171A"
 
-    INPUT_HOVER = "#1B1B1F"
-
-    INPUT_FOCUS = "#18181B"
+    INPUT_HOVER = "#1E1E22"       # was #1B1B1F
+    INPUT_FOCUS = "#1B1B1F"       # was #18181B
 
     # ==========================================================
     # Severity
@@ -122,11 +128,8 @@ class Color:
     # ==========================================================
 
     STATUS_OPEN = "#EF4655"
-
     STATUS_VERIFIED = "#6FCF7C"
-
     STATUS_REPORTED = "#C79DFF"
-
     STATUS_CLOSED = "#9A9AA1"
 
     STATUS_MAP = {
@@ -141,15 +144,10 @@ class Color:
     # ==========================================================
 
     SUCCESS = "#6FCF7C"
-
     WARNING = "#E6B84A"
-
     ERROR = "#EF4655"
-
     LINK = "#FF707D"
-
     SELECTION = SIGNAL_MUTED
-
     SHADOW = "#000000"
 
 
@@ -166,63 +164,41 @@ class Font:
     )
 
     SIZE_XS = 11
-
     SIZE_SM = 12
-
     SIZE_MD = 13
-
     SIZE_LG = 15
-
     SIZE_XL = 18
-
     SIZE_XXL = 24
 
     WEIGHT_NORMAL = 400
-
     WEIGHT_MEDIUM = 500
-
     WEIGHT_SEMIBOLD = 600
-
     WEIGHT_BOLD = 700
 
 
 class Space:
     XS = 4
-
     SM = 8
-
     MD = 12
-
     LG = 16
-
     XL = 24
-
     XXL = 32
-
     XXXL = 40
 
 
 class Radius:
     XS = 4
-
     SM = 6
-
     MD = 8
-
     LG = 10
-
     XL = 14
-
     PILL = 999
 
 
 class Shadow:
     NONE = 0
-
     SM = 2
-
     MD = 4
-
     LG = 8
 
 
@@ -231,9 +207,6 @@ class Shadow:
 # ==============================================================
 
 SIDEBAR_WIDTH = 240
-
 TOPBAR_HEIGHT = 58
-
 STATUSBAR_HEIGHT = 28
-
 CONTENT_MAX_WIDTH = 1600
