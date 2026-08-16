@@ -10,26 +10,133 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # ==========================================================
+      # Checkout
+      # ==========================================================
+
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      # ==========================================================
+      # Python
+      # ==========================================================
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
+      # ==========================================================
+      # Dependencies
+      # ==========================================================
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           python -m pip install .
-          python -m pip install pyinstaller
+          python -m pip install pyinstaller Pillow
+
+      # ==========================================================
+      # PyInstaller
+      # ==========================================================
 
       - name: Build RedForge
         run: |
           pyinstaller --clean RedForge.spec
 
-      - name: Upload Linux build
+      # ==========================================================
+      # AppImage structure
+      # ==========================================================
+
+      - name: Prepare AppImage
+        run: |
+          mkdir -p AppDir/usr/bin
+          mkdir -p AppDir/usr/share/applications
+          mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps
+
+          cp -r dist/RedForge/* AppDir/usr/bin/
+
+      # ==========================================================
+      # Application icon
+      # ==========================================================
+
+      - name: Prepare Linux icon
+        run: |
+          python - <<'PY'
+          from PIL import Image
+
+          image = Image.open("assets/redforge.ico")
+          image = image.convert("RGBA")
+          image = image.resize((256, 256))
+
+          image.save(
+              "AppDir/usr/share/icons/hicolor/256x256/apps/RedForge.png"
+          )
+
+          image.save("AppDir/RedForge.png")
+          PY
+
+      # ==========================================================
+      # Desktop entry
+      # ==========================================================
+
+      - name: Create desktop entry
+        run: |
+          cat > AppDir/usr/share/applications/RedForge.desktop << 'EOF'
+          [Desktop Entry]
+          Name=RedForge
+          Exec=RedForge
+          Icon=RedForge
+          Type=Application
+          Categories=Development;Security;
+          Terminal=false
+          EOF
+
+          cp AppDir/usr/share/applications/RedForge.desktop AppDir/RedForge.desktop
+
+      # ==========================================================
+      # AppRun
+      # ==========================================================
+
+      - name: Create AppRun
+        run: |
+          cat > AppDir/AppRun << 'EOF'
+          #!/bin/sh
+
+          HERE="$(dirname "$(readlink -f "$0")")"
+
+          exec "$HERE/usr/bin/RedForge"
+          EOF
+
+          chmod +x AppDir/AppRun
+
+      # ==========================================================
+      # Download appimagetool
+      # ==========================================================
+
+      - name: Download appimagetool
+        run: |
+          wget -O appimagetool \
+            https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
+
+          chmod +x appimagetool
+
+      # ==========================================================
+      # Build AppImage
+      # ==========================================================
+
+      - name: Build AppImage
+        run: |
+          ./appimagetool --appimage-extract-and-run \
+            AppDir \
+            RedForge.AppImage
+
+      # ==========================================================
+      # Upload AppImage
+      # ==========================================================
+
+      - name: Upload Linux AppImage
         uses: actions/upload-artifact@v4
         with:
           name: RedForge-Linux
-          path: dist/RedForge/
+          path: RedForge.AppImage
