@@ -3,6 +3,7 @@ from PySide6.QtWidgets import (
     QDialog,
     QDialogButtonBox,
     QFormLayout,
+    QLabel,
     QLineEdit,
     QMessageBox,
     QTextEdit,
@@ -16,7 +17,7 @@ class NewEngagementDialog(QDialog):
         super().__init__(parent)
 
         self.setWindowTitle("New Engagement")
-        self.setMinimumWidth(500)
+        self.setMinimumWidth(460)
 
         self._build_ui()
         self._connect_signals()
@@ -28,8 +29,22 @@ class NewEngagementDialog(QDialog):
     def _build_ui(self):
 
         main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(24, 24, 24, 20)
+        main_layout.setSpacing(16)
+
+        title_label = QLabel("New Engagement")
+        title_label.setObjectName("sectionTitle")
+        main_layout.addWidget(title_label)
+
+        subtitle_label = QLabel(
+            "Set up the scope container for a new assessment."
+        )
+        subtitle_label.setObjectName("caption")
+        main_layout.addWidget(subtitle_label)
 
         form_layout = QFormLayout()
+        form_layout.setSpacing(12)
+        form_layout.setContentsMargins(0, 8, 0, 0)
 
         # Program Name
         self.program_name_input = QLineEdit()
@@ -70,27 +85,12 @@ class NewEngagementDialog(QDialog):
         self.description_input.setPlaceholderText(
             "Describe this engagement..."
         )
-        self.description_input.setFixedHeight(120)
+        self.description_input.setFixedHeight(100)
 
-        form_layout.addRow(
-            "Program Name:",
-            self.program_name_input,
-        )
-
-        form_layout.addRow(
-            "Platform:",
-            self.platform_input,
-        )
-
-        form_layout.addRow(
-            "Engagement Type:",
-            self.engagement_type_input,
-        )
-
-        form_layout.addRow(
-            "Description:",
-            self.description_input,
-        )
+        form_layout.addRow("Program Name", self.program_name_input)
+        form_layout.addRow("Platform", self.platform_input)
+        form_layout.addRow("Engagement Type", self.engagement_type_input)
+        form_layout.addRow("Description", self.description_input)
 
         main_layout.addLayout(form_layout)
 
@@ -99,9 +99,11 @@ class NewEngagementDialog(QDialog):
             | QDialogButtonBox.StandardButton.Ok
         )
 
-        self.button_box.button(
+        ok_button = self.button_box.button(
             QDialogButtonBox.StandardButton.Ok
-        ).setText("Create")
+        )
+        ok_button.setText("Create Engagement")
+        ok_button.setObjectName("primaryButton")
 
         main_layout.addWidget(self.button_box)
 

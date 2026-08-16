@@ -6,9 +6,12 @@ and shutdown of the application.
 """
 
 import sys
+from pathlib import Path
 
+from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication
 
+from redforge.ui.styles.theme import apply_theme
 from redforge.database.session import SessionLocal
 
 from redforge.services.engagement_service import EngagementService
@@ -37,6 +40,17 @@ class Application:
 
         self.qt_app = QApplication(sys.argv)
 
+        if getattr(sys, "frozen", False):
+            base_path = Path(sys._MEIPASS)
+        else:
+            base_path = Path(__file__).resolve().parents[3]
+
+        icon_path = base_path / "assets" / "redforge.ico"
+
+        self.qt_app.setWindowIcon(QIcon(str(icon_path)))
+
+        apply_theme(self.qt_app)
+
         # ==================================================
         # Database
         # ==================================================
@@ -58,15 +72,19 @@ class Application:
         self.note_service = NoteService(
             self.session
         )
+
         self.recon_service = ReconService(
-                    self.session
-                )
+            self.session
+        )
+
         self.evidence_service = EvidenceService(
             self.session
         )
+
         self.finding_service = FindingService(
             self.session
         )
+
         self.report_service = ReportService(
             self.session
         )

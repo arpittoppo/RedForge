@@ -3,11 +3,13 @@ Workspace view for RedForge.
 """
 
 from PySide6.QtCore import Signal
+
 from PySide6.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
+    QApplication,
     QHBoxLayout,
     QStackedWidget,
+    QVBoxLayout,
+    QWidget,
 )
 
 from redforge.services.scope_service import ScopeService
@@ -29,6 +31,8 @@ from redforge.ui.pages.evidence_page import EvidencePage
 from redforge.ui.pages.findings_page import FindingsPage
 from redforge.ui.pages.reports_page import ReportsPage
 from redforge.ui.pages.settings_page import SettingsPage
+
+from redforge.ui.styles.theme import apply_theme
 
 
 class WorkspaceView(QWidget):
@@ -73,9 +77,11 @@ class WorkspaceView(QWidget):
 
         self._build_ui()
 
-    def _build_ui(
-        self,
-    ):
+    # ==================================================
+    # UI
+    # ==================================================
+
+    def _build_ui(self) -> None:
         """
         Build the workspace UI.
         """
@@ -85,14 +91,19 @@ class WorkspaceView(QWidget):
         # ==================================================
 
         self.sidebar = Sidebar()
+
         self.top_bar = TopBar()
+
         self.status_bar = StatusBar()
 
         # ==================================================
         # Pages
         # ==================================================
 
-        self.dashboard_page = DashboardPage()
+        self.dashboard_page = DashboardPage(
+            note_service=self.note_service,
+            finding_service=self.finding_service,
+        )
 
         self.scope_page = ScopePage(
             scope_service=self.scope_service,
@@ -121,45 +132,33 @@ class WorkspaceView(QWidget):
         self.settings_page = SettingsPage()
 
         # ==================================================
-        # Stacked Widget
+        # Stack
         # ==================================================
 
         self.stack = QStackedWidget()
 
-        self.stack.addWidget(
-            self.dashboard_page
-        )
+        pages = [
+            self.dashboard_page,
+            self.scope_page,
+            self.recon_page,
+            self.notes_page,
+            self.evidence_page,
+            self.findings_page,
+            self.reports_page,
+            self.settings_page,
+        ]
 
-        self.stack.addWidget(
-            self.scope_page
-        )
-
-        self.stack.addWidget(
-            self.recon_page
-        )
-
-        self.stack.addWidget(
-            self.notes_page
-        )
-
-        self.stack.addWidget(
-            self.evidence_page
-        )
-
-        self.stack.addWidget(
-            self.findings_page
-        )
-
-        self.stack.addWidget(
-            self.reports_page
-        )
-
-        self.stack.addWidget(
-            self.settings_page
-        )
+        for page in pages:
+            self.stack.addWidget(
+                page
+            )
 
         self.stack.setCurrentWidget(
             self.dashboard_page
+        )
+
+        self.sidebar.set_active(
+            "dashboard"
         )
 
         # ==================================================
@@ -174,31 +173,65 @@ class WorkspaceView(QWidget):
             self._navigate
         )
 
+        self.settings_page.font_scale_changed.connect(
+            self._font_scale_changed
+        )
+
         # ==================================================
-        # Layouts
+        # Workspace Layout
         # ==================================================
 
-        self.workspace_layout = QHBoxLayout()
+        workspace_layout = QHBoxLayout()
 
-        self.workspace_layout.addWidget(
+        workspace_layout.setSpacing(
+            0
+        )
+
+        workspace_layout.setContentsMargins(
+            0,
+            0,
+            0,
+            0,
+        )
+
+        workspace_layout.addWidget(
             self.sidebar
         )
 
-        self.workspace_layout.addWidget(
-            self.stack
+        workspace_layout.addWidget(
+            self.stack,
+            stretch=1,
         )
 
-        self.main_layout = QVBoxLayout(self)
+        # ==================================================
+        # Root Layout
+        # ==================================================
 
-        self.main_layout.addWidget(
+        root = QVBoxLayout(
+            self
+        )
+
+        root.setSpacing(
+            0
+        )
+
+        root.setContentsMargins(
+            0,
+            0,
+            0,
+            0,
+        )
+
+        root.addWidget(
             self.top_bar
         )
 
-        self.main_layout.addLayout(
-            self.workspace_layout
+        root.addLayout(
+            workspace_layout,
+            stretch=1,
         )
 
-        self.main_layout.addWidget(
+        root.addWidget(
             self.status_bar
         )
 
@@ -209,9 +242,9 @@ class WorkspaceView(QWidget):
     def load_engagement(
         self,
         engagement,
-    ):
+    ) -> None:
         """
-        Load the selected engagement into the workspace.
+        Load the selected engagement.
         """
 
         self.engagement = engagement
@@ -243,18 +276,23 @@ class WorkspaceView(QWidget):
         self.findings_page.load_engagement(
             engagement
         )
+
         self.reports_page.load_engagement(
             engagement
         )
 
+        self._navigate(
+            "dashboard"
+        )
+
     # ==================================================
-    # Private Methods
+    # Navigation
     # ==================================================
 
     def _navigate(
         self,
         page: str,
-    ):
+    ) -> None:
         """
         Switch between workspace pages.
         """
@@ -280,9 +318,40 @@ class WorkspaceView(QWidget):
                 widget
             )
 
+            self.sidebar.set_active(
+                page
+            )
+
+    # ==================================================
+    # Font Size
+    # ==================================================
+
+    def _font_scale_changed(
+        self,
+        scale: float,
+    ) -> None:
+        """
+        Apply the selected font scale
+        to the entire RedForge application.
+        """
+
+        app = QApplication.instance()
+
+        if app is None:
+            return
+
+        apply_theme(
+            app,
+            font_scale=scale,
+        )
+
+    # ==================================================
+    # Home
+    # ==================================================
+
     def _home_requested(
         self,
-    ):
+    ) -> None:
         """
         Forward the home request to MainWindow.
         """
